@@ -1,0 +1,48 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: dms
+  datasource:
+    url: jdbc:postgresql://localhost:5432/dms_db
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+    show-sql: true
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+# Custom Application Properties for AWS
+aws:
+  s3:
+    bucket-name: piats-dms-dev
+    region: us-east-1
+  credentials:
+    access-key: AKIA356SJYW7KK3POOVV
+    secret-key: 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
+
+# Logging
+logging:
+  level:
+    com.piats.dms: DEBUG
+    org.springframework.web: DEBUG
+
+# Swagger/OpenAPI
+springdoc:
+  api-docs:
+    path: /v1/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    try-it-out-enabled: true
+    operations-sorter: method
+    tags-sorter: alpha 
