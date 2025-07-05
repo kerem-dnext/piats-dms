@@ -9,8 +9,6 @@ import java.util.UUID;
 
 @Repository
 public interface DocumentRepository extends JpaRepository<Document, UUID> {
-    List<Document> findByUserId(UUID userId);
     List<Document> findByApplicationId(UUID applicationId);
     Optional<Document> findByS3Key(String s3Key);
-    List<Document> findByUserIdAndApplicationId(UUID userId, UUID applicationId);
 } 

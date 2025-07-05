@@ -9,7 +9,6 @@ import java.util.UUID;
 @Builder
 public class DocumentResponseDTO {
     private UUID id;
-    private UUID userId;
     private UUID applicationId;
     private String originalFilename;
     private String fileType;

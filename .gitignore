@@ -31,3 +31,23 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Maven ###
+# Log files
+*.log
+# Executable JARs
+*.jar
+# Test reports
+/target/surefire-reports/
+/target/failsafe-reports/
+
+### Application Secrets ###
+# Ignore sensitive configuration files
+application-*.yml
+application-*.properties
+!application-test.yml
+!application-test.properties
+
+### Operating System Files ###
+.DS_Store
+Thumbs.db

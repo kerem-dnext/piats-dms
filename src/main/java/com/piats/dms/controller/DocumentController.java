@@ -20,8 +20,8 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/documents")
-@Tag(name = "Document Management", description = "APIs for managing CV and document uploads")
+@RequestMapping("/api/v1")
+@Tag(name = "Document Management", description = "APIs for managing document uploads for applications")
 @Slf4j
 public class DocumentController {
 
@@ -31,36 +31,33 @@ public class DocumentController {
         this.documentService = documentService;
     }
 
-    @Operation(summary = "Upload a document", description = "Upload a CV or document file for a specific user and optionally associate it with a job application")
+    @Operation(summary = "Upload a document for an application", description = "Upload a CV or other document and associate it with a job application ID.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Document uploaded successfully"),
         @ApiResponse(responseCode = "400", description = "Invalid file or parameters"),
         @ApiResponse(responseCode = "413", description = "File too large"),
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<UploadResponseDTO> uploadDocument(
+    @PostMapping(value = "/applications/{applicationId}/documents", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<UploadResponseDTO> uploadForApplication(
             @Parameter(description = "The file to upload", required = true)
             @RequestParam("file") MultipartFile file,
             
-            @Parameter(description = "The ID of the user uploading the document", required = true)
-            @RequestParam("userId") UUID userId,
-            
-            @Parameter(description = "The ID of the job application (optional)")
-            @RequestParam(value = "applicationId", required = false) UUID applicationId) {
+            @Parameter(description = "The ID of the job application", required = true)
+            @PathVariable UUID applicationId) {
         
         try {
-            log.info("Received upload request for user: {}, application: {}, filename: {}", 
-                    userId, applicationId, file.getOriginalFilename());
+            log.info("Received upload request for application: {}, filename: {}", 
+                    applicationId, file.getOriginalFilename());
             
-            UploadResponseDTO response = documentService.uploadDocument(file, userId, applicationId);
+            UploadResponseDTO response = documentService.uploadDocument(file, applicationId);
             return ResponseEntity.ok(response);
             
         } catch (IllegalArgumentException e) {
             log.warn("Invalid upload request: {}", e.getMessage());
             return ResponseEntity.badRequest().build();
         } catch (IOException e) {
-            log.error("IO error during file upload", e);
+            log.error("IO error during file upload for application: {}", applicationId, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -70,7 +67,7 @@ public class DocumentController {
         @ApiResponse(responseCode = "200", description = "Download URL generated successfully"),
         @ApiResponse(responseCode = "404", description = "Document not found")
     })
-    @GetMapping("/{documentId}/download-url")
+    @GetMapping("/documents/{documentId}/download-url")
     public ResponseEntity<String> getDownloadUrl(
             @Parameter(description = "The ID of the document", required = true)
             @PathVariable UUID documentId) {
@@ -85,7 +82,7 @@ public class DocumentController {
         @ApiResponse(responseCode = "200", description = "Document metadata retrieved successfully"),
         @ApiResponse(responseCode = "404", description = "Document not found")
     })
-    @GetMapping("/{documentId}")
+    @GetMapping("/documents/{documentId}")
     public ResponseEntity<DocumentResponseDTO> getDocumentMetadata(
             @Parameter(description = "The ID of the document", required = true)
             @PathVariable UUID documentId) {
@@ -95,25 +92,11 @@ public class DocumentController {
         return ResponseEntity.ok(document);
     }
 
-    @Operation(summary = "Get user documents", description = "Retrieve all documents for a specific user")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "User documents retrieved successfully")
-    })
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<DocumentResponseDTO>> getUserDocuments(
-            @Parameter(description = "The ID of the user", required = true)
-            @PathVariable UUID userId) {
-        
-        log.info("Retrieving documents for user: {}", userId);
-        List<DocumentResponseDTO> documents = documentService.getUserDocuments(userId);
-        return ResponseEntity.ok(documents);
-    }
-
-    @Operation(summary = "Get application documents", description = "Retrieve all documents for a specific job application")
+    @Operation(summary = "Get all documents for an application", description = "Retrieve all documents for a specific job application")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Application documents retrieved successfully")
     })
-    @GetMapping("/application/{applicationId}")
+    @GetMapping("/applications/{applicationId}/documents")
     public ResponseEntity<List<DocumentResponseDTO>> getApplicationDocuments(
             @Parameter(description = "The ID of the job application", required = true)
             @PathVariable UUID applicationId) {
@@ -128,7 +111,7 @@ public class DocumentController {
         @ApiResponse(responseCode = "200", description = "Document metadata updated successfully"),
         @ApiResponse(responseCode = "404", description = "Document not found")
     })
-    @PutMapping("/{documentId}")
+    @PutMapping("/documents/{documentId}")
     public ResponseEntity<DocumentResponseDTO> updateDocumentMetadata(
             @Parameter(description = "The ID of the document", required = true)
             @PathVariable UUID documentId,
@@ -146,7 +129,7 @@ public class DocumentController {
         @ApiResponse(responseCode = "204", description = "Document deleted successfully"),
         @ApiResponse(responseCode = "404", description = "Document not found")
     })
-    @DeleteMapping("/{documentId}")
+    @DeleteMapping("/documents/{documentId}")
     public ResponseEntity<Void> deleteDocument(
             @Parameter(description = "The ID of the document to delete", required = true)
             @PathVariable UUID documentId) {

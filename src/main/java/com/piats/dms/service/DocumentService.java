@@ -40,16 +40,20 @@ public class DocumentService {
         this.s3Service = s3Service;
     }
 
-    public UploadResponseDTO uploadDocument(MultipartFile file, UUID userId, UUID applicationId) throws IOException {
-        log.info("Starting document upload for user: {}, application: {}", userId, applicationId);
+    public UploadResponseDTO uploadDocument(MultipartFile file, UUID applicationId) throws IOException {
+        log.info("Starting document upload for application: {}", applicationId);
         
+        if (applicationId == null) {
+            throw new IllegalArgumentException("An application ID must be provided.");
+        }
+
         // Validate file
         validateFile(file);
         
         // Generate unique S3 key
         String documentId = UUID.randomUUID().toString();
         String fileExtension = getFileExtension(file.getOriginalFilename());
-        String s3Key = String.format("documents/%s/%s%s", userId, documentId, fileExtension);
+        String s3Key = String.format("applications/%s/%s%s", applicationId, documentId, fileExtension);
         
         try {
             // Upload to S3
@@ -57,7 +61,6 @@ public class DocumentService {
             
             // Create metadata entity
             Document doc = Document.builder()
-                .userId(userId)
                 .applicationId(applicationId)
                 .originalFilename(file.getOriginalFilename())
                 .s3Bucket(s3Service.getBucketName())
@@ -76,7 +79,7 @@ public class DocumentService {
             return new UploadResponseDTO(savedDoc.getId(), "File uploaded successfully", downloadUrl);
             
         } catch (Exception e) {
-            log.error("Failed to upload document for user: {}", userId, e);
+            log.error("Failed to upload document for application: {}", applicationId, e);
             // If database save fails, clean up S3 file
             try {
                 s3Service.deleteFile(s3Key);
@@ -105,16 +108,6 @@ public class DocumentService {
             .orElseThrow(() -> new DocumentNotFoundException("Document not found with ID: " + documentId));
         
         return mapToResponseDTO(doc);
-    }
-    
-    @Transactional(readOnly = true)
-    public List<DocumentResponseDTO> getUserDocuments(UUID userId) {
-        log.info("Retrieving documents for user: {}", userId);
-        
-        List<Document> documents = documentRepository.findByUserId(userId);
-        return documents.stream()
-            .map(this::mapToResponseDTO)
-            .collect(Collectors.toList());
     }
     
     @Transactional(readOnly = true)
@@ -189,7 +182,6 @@ public class DocumentService {
     private DocumentResponseDTO mapToResponseDTO(Document doc) {
         return DocumentResponseDTO.builder()
             .id(doc.getId())
-            .userId(doc.getUserId())
             .applicationId(doc.getApplicationId())
             .originalFilename(doc.getOriginalFilename())
             .fileType(doc.getFileType())
