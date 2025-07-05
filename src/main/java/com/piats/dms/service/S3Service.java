@@ -15,6 +15,14 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.InputStream;
 import java.time.Duration;
 
+/**
+ * A service for interacting with Amazon S3.
+ * <p>
+ * This class abstracts the low-level details of the AWS S3 SDK and provides
+ * simple methods for uploading, deleting, and generating presigned URLs for files.
+ * It is configured with the bucket name from application properties.
+ * </p>
+ */
 @Service
 @Slf4j
 public class S3Service {
@@ -25,11 +33,26 @@ public class S3Service {
     @Value("${aws.s3.bucket-name}")
     private String bucketName;
 
+    /**
+     * Constructs an {@code S3Service} with the necessary S3 clients.
+     *
+     * @param s3Client    The client for direct S3 operations.
+     * @param s3Presigner The client for generating presigned URLs.
+     */
     public S3Service(S3Client s3Client, S3Presigner s3Presigner) {
         this.s3Client = s3Client;
         this.s3Presigner = s3Presigner;
     }
 
+    /**
+     * Uploads a file to the S3 bucket.
+     *
+     * @param key           The unique key (path) to store the file under in S3.
+     * @param contentLength The length of the file content in bytes.
+     * @param inputStream   The input stream of the file content.
+     * @param contentType   The MIME type of the file.
+     * @throws RuntimeException if the upload fails.
+     */
     public void uploadFile(String key, long contentLength, InputStream inputStream, String contentType) {
         try {
             PutObjectRequest request = PutObjectRequest.builder()
@@ -47,6 +70,14 @@ public class S3Service {
         }
     }
 
+    /**
+     * Generates a temporary, presigned URL for downloading a file from S3.
+     *
+     * @param key      The S3 key of the file.
+     * @param duration The duration for which the URL should be valid.
+     * @return A string representation of the presigned URL.
+     * @throws RuntimeException if URL generation fails.
+     */
     public String generatePresignedUrl(String key, Duration duration) {
         try {
             GetObjectRequest getObjectRequest = GetObjectRequest.builder()
@@ -69,6 +100,12 @@ public class S3Service {
         }
     }
 
+    /**
+     * Deletes a file from the S3 bucket.
+     *
+     * @param key The S3 key of the file to delete.
+     * @throws RuntimeException if the deletion fails.
+     */
     public void deleteFile(String key) {
         try {
             DeleteObjectRequest deleteRequest = DeleteObjectRequest.builder()
@@ -83,6 +120,11 @@ public class S3Service {
         }
     }
 
+    /**
+     * Returns the name of the S3 bucket used by this service.
+     *
+     * @return The S3 bucket name.
+     */
     public String getBucketName() {
         return bucketName;
     }

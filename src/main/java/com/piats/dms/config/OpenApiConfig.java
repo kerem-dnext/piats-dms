@@ -6,9 +6,22 @@ import io.swagger.v3.oas.models.info.Contact;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Configures the OpenAPI documentation for the service.
+ * <p>
+ * This class provides a bean that defines the high-level information for the
+ * API, such as title, description, version, and contact details, which is
+ * used by Swagger to generate the API documentation.
+ * </p>
+ */
 @Configuration
 public class OpenApiConfig {
 
+    /**
+     * Creates the {@link OpenAPI} bean with customized API metadata.
+     *
+     * @return A configured {@code OpenAPI} instance.
+     */
     @Bean
     public OpenAPI openAPI() {
         return new OpenAPI()
