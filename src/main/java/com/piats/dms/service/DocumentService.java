@@ -137,6 +137,24 @@ public class DocumentService {
         
         return s3Service.generatePresignedUrl(doc.getS3Key(), Duration.ofMinutes(10));
     }
+
+    /**
+     * Generates a temporary, presigned download URL for an application's document.
+     * The transaction is read-only as this operation does not modify data.
+     *
+     * @param applicationId The UUID of the application.
+     * @return A string containing the presigned URL.
+     * @throws DocumentNotFoundException if no document for the given application is found.
+     */
+    @Transactional(readOnly = true)
+    public String getDownloadUrlForApplication(UUID applicationId) {
+        log.info("Generating download URL for application: {}", applicationId);
+
+        Document doc = documentRepository.findByApplicationId(applicationId).stream().findFirst()
+                .orElseThrow(() -> new DocumentNotFoundException("Document not found for application ID: " + applicationId));
+
+        return s3Service.generatePresignedUrl(doc.getS3Key(), Duration.ofMinutes(10));
+    }
     
     /**
      * Retrieves the metadata for a single document.

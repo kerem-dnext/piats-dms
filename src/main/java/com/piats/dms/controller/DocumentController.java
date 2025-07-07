@@ -90,21 +90,21 @@ public class DocumentController {
     /**
      * Generates a presigned download URL for a document.
      *
-     * @param documentId The UUID of the document.
+     * @param applicationId The UUID of the application.
      * @return A {@link ResponseEntity} containing the temporary download URL as a string.
      */
-    @Operation(summary = "Get document download URL", description = "Generate a temporary download URL for a specific document")
+    @Operation(summary = "Get document download URL", description = "Generate a temporary download URL for a specific document for an application")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Download URL generated successfully"),
         @ApiResponse(responseCode = "404", description = "Document not found")
     })
-    @GetMapping("/documents/{documentId}/download-url")
+    @GetMapping("/applications/{applicationId}/download-url")
     public ResponseEntity<String> getDownloadUrl(
-            @Parameter(description = "The ID of the document", required = true)
-            @PathVariable UUID documentId) {
+            @Parameter(description = "The ID of the application", required = true)
+            @PathVariable UUID applicationId) {
         
-        log.info("Generating download URL for document: {}", documentId);
-        String url = documentService.getDownloadUrl(documentId);
+        log.info("Generating download URL for application: {}", applicationId);
+        String url = documentService.getDownloadUrlForApplication(applicationId);
         return ResponseEntity.ok(url);
     }
 
@@ -129,71 +129,71 @@ public class DocumentController {
         return ResponseEntity.ok(document);
     }
 
-    /**
-     * Retrieves a list of all documents associated with an application.
-     *
-     * @param applicationId The UUID of the application.
-     * @return A {@link ResponseEntity} containing a list of document metadata DTOs.
-     */
-    @Operation(summary = "Get all documents for an application", description = "Retrieve all documents for a specific job application")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Application documents retrieved successfully")
-    })
-    @GetMapping("/applications/{applicationId}/documents")
-    public ResponseEntity<List<DocumentResponseDTO>> getApplicationDocuments(
-            @Parameter(description = "The ID of the job application", required = true)
-            @PathVariable UUID applicationId) {
+    // /**
+    //  * Retrieves a list of all documents associated with an application.
+    //  *
+    //  * @param applicationId The UUID of the application.
+    //  * @return A {@link ResponseEntity} containing a list of document metadata DTOs.
+    //  */
+    // @Operation(summary = "Get all documents for an application", description = "Retrieve all documents for a specific job application")
+    // @ApiResponses(value = {
+    //     @ApiResponse(responseCode = "200", description = "Application documents retrieved successfully")
+    // })
+    // @GetMapping("/applications/{applicationId}/documents")
+    // public ResponseEntity<List<DocumentResponseDTO>> getApplicationDocuments(
+    //         @Parameter(description = "The ID of the job application", required = true)
+    //         @PathVariable UUID applicationId) {
         
-        log.info("Retrieving documents for application: {}", applicationId);
-        List<DocumentResponseDTO> documents = documentService.getApplicationDocuments(applicationId);
-        return ResponseEntity.ok(documents);
-    }
+    //     log.info("Retrieving documents for application: {}", applicationId);
+    //     List<DocumentResponseDTO> documents = documentService.getApplicationDocuments(applicationId);
+    //     return ResponseEntity.ok(documents);
+    // }
 
-    /**
-     * Updates the metadata of a document, such as its application association.
-     *
-     * @param documentId    The UUID of the document to update.
-     * @param applicationId The new application UUID to associate with the document.
-     * @return A {@link ResponseEntity} containing the updated document metadata DTO.
-     */
-    @Operation(summary = "Update document metadata", description = "Update the application association for a document")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Document metadata updated successfully"),
-        @ApiResponse(responseCode = "404", description = "Document not found")
-    })
-    @PutMapping("/documents/{documentId}")
-    public ResponseEntity<DocumentResponseDTO> updateDocumentMetadata(
-            @Parameter(description = "The ID of the document", required = true)
-            @PathVariable UUID documentId,
+    // /**
+    //  * Updates the metadata of a document, such as its application association.
+    //  *
+    //  * @param documentId    The UUID of the document to update.
+    //  * @param applicationId The new application UUID to associate with the document.
+    //  * @return A {@link ResponseEntity} containing the updated document metadata DTO.
+    //  */
+    // @Operation(summary = "Update document metadata", description = "Update the application association for a document")
+    // @ApiResponses(value = {
+    //     @ApiResponse(responseCode = "200", description = "Document metadata updated successfully"),
+    //     @ApiResponse(responseCode = "404", description = "Document not found")
+    // })
+    // @PutMapping("/documents/{documentId}")
+    // public ResponseEntity<DocumentResponseDTO> updateDocumentMetadata(
+    //         @Parameter(description = "The ID of the document", required = true)
+    //         @PathVariable UUID documentId,
             
-            @Parameter(description = "The new application ID to associate with the document")
-            @RequestParam(value = "applicationId", required = false) UUID applicationId) {
+    //         @Parameter(description = "The new application ID to associate with the document")
+    //         @RequestParam(value = "applicationId", required = false) UUID applicationId) {
         
-        log.info("Updating metadata for document: {}, new application: {}", documentId, applicationId);
-        DocumentResponseDTO updatedDocument = documentService.updateDocumentMetadata(documentId, applicationId);
-        return ResponseEntity.ok(updatedDocument);
-    }
+    //     log.info("Updating metadata for document: {}, new application: {}", documentId, applicationId);
+    //     DocumentResponseDTO updatedDocument = documentService.updateDocumentMetadata(documentId, applicationId);
+    //     return ResponseEntity.ok(updatedDocument);
+    // }
 
-    /**
-     * Deletes a document.
-     *
-     * @param documentId The UUID of the document to delete.
-     * @return A {@link ResponseEntity} with no content.
-     */
-    @Operation(summary = "Delete document", description = "Delete a document and its associated file from S3")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "204", description = "Document deleted successfully"),
-        @ApiResponse(responseCode = "404", description = "Document not found")
-    })
-    @DeleteMapping("/documents/{documentId}")
-    public ResponseEntity<Void> deleteDocument(
-            @Parameter(description = "The ID of the document to delete", required = true)
-            @PathVariable UUID documentId) {
+    // /**
+    //  * Deletes a document.
+    //  *
+    //  * @param documentId The UUID of the document to delete.
+    //  * @return A {@link ResponseEntity} with no content.
+    //  */
+    // @Operation(summary = "Delete document", description = "Delete a document and its associated file from S3")
+    // @ApiResponses(value = {
+    //     @ApiResponse(responseCode = "204", description = "Document deleted successfully"),
+    //     @ApiResponse(responseCode = "404", description = "Document not found")
+    // })
+    // @DeleteMapping("/documents/{documentId}")
+    // public ResponseEntity<Void> deleteDocument(
+    //         @Parameter(description = "The ID of the document to delete", required = true)
+    //         @PathVariable UUID documentId) {
         
-        log.info("Deleting document: {}", documentId);
-        documentService.deleteDocument(documentId);
-        return ResponseEntity.noContent().build();
-    }
+    //     log.info("Deleting document: {}", documentId);
+    //     documentService.deleteDocument(documentId);
+    //     return ResponseEntity.noContent().build();
+    // }
 
     /**
      * Provides a simple health check endpoint.
