@@ -150,7 +150,7 @@ public class DocumentService {
     public String getDownloadUrlForApplication(UUID applicationId) {
         log.info("Generating download URL for application: {}", applicationId);
 
-        Document doc = documentRepository.findByApplicationId(applicationId).stream().findFirst()
+        Document doc = documentRepository.findTopByApplicationIdOrderByCreatedAtDesc(applicationId)
                 .orElseThrow(() -> new DocumentNotFoundException("Document not found for application ID: " + applicationId));
 
         return s3Service.generatePresignedUrl(doc.getS3Key(), Duration.ofMinutes(10));

@@ -25,6 +25,14 @@ public interface DocumentRepository extends JpaRepository<Document, UUID> {
     List<Document> findByApplicationId(UUID applicationId);
 
     /**
+     * Finds the most recent document for a specific application ID.
+     *
+     * @param applicationId The UUID of the application.
+     * @return An {@link Optional} containing the latest {@link Document}.
+     */
+    Optional<Document> findTopByApplicationIdOrderByCreatedAtDesc(UUID applicationId);
+
+    /**
      * Finds a document by its unique S3 key.
      * <p>
      * This is useful for ensuring that no duplicate file references are created
